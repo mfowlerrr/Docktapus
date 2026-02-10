@@ -7,6 +7,8 @@ import tempfile
 import yaml
 import typer
 
+from docktapus.commands.compose_utils import prepare_compose
+
 OCT_CONFIG = Path.home() / ".dtop.yml"
 
 
@@ -126,11 +128,13 @@ def up(
     # Start prod services (labelled prod)
     if prod_to_start:
         prod_labelled = _inject_labels(prod_compose, "prod", project_name)
+        prod_labelled = prepare_compose(prod_labelled, project_name)
         _compose_up(prod_labelled, prod_to_start, build)
 
     # Start dev services (labelled dev)
     if dev_to_start:
         dev_labelled = _inject_labels(dev_compose, "dev", project_name)
+        dev_labelled = prepare_compose(dev_labelled, project_name)
         _compose_up(dev_labelled, dev_to_start, build)
 
     typer.echo("Services started")

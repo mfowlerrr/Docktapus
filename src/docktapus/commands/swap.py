@@ -1,13 +1,12 @@
 import json
-import os
 import subprocess
-import tempfile
 from pathlib import Path
 
 import yaml
 import typer
 
 from docktapus.commands.up import OCT_CONFIG, _inject_labels, _compose_up
+from docktapus.commands.compose_utils import prepare_compose
 
 
 def _get_label(labels_str: str, key: str) -> str:
@@ -24,8 +23,10 @@ def _get_service_env(project_name: str, service_name: str) -> str | None:
         [
             "docker",
             "ps",
-            "--filter", f"label=dtop.project={project_name}",
-            "--format", "{{json .}}",
+            "--filter",
+            f"label=dtop.project={project_name}",
+            "--format",
+            "{{json .}}",
         ],
         capture_output=True,
         text=True,
@@ -49,8 +50,10 @@ def _stop_service_containers(project_name: str, service_name: str):
             "docker",
             "ps",
             "-a",
-            "--filter", f"label=dtop.project={project_name}",
-            "--format", "{{json .}}",
+            "--filter",
+            f"label=dtop.project={project_name}",
+            "--format",
+            "{{json .}}",
         ],
         capture_output=True,
         text=True,
@@ -128,13 +131,17 @@ def swap(
     all_prod_services = list((prod_compose.get("services") or {}).keys())
 
     if service_name not in all_dev_services and service_name not in all_prod_services:
-        typer.echo(f"❌ Service '{service_name}' not found in dev or prod compose files")
+        typer.echo(
+            f"❌ Service '{service_name}' not found in dev or prod compose files"
+        )
         raise typer.Exit(code=1)
 
     current_env = _get_service_env(project_name, service_name)
 
     if current_env is None:
-        typer.echo(f"❌ Service '{service_name}' is not currently running in project '{project_name}'")
+        typer.echo(
+            f"❌ Service '{service_name}' is not currently running in project '{project_name}'"
+        )
         raise typer.Exit(code=1)
 
     if current_env == "prod":
@@ -159,13 +166,12 @@ def swap(
     # Start the target version – build a minimal compose dict containing
     # only the service being swapped so Docker Compose doesn't touch others.
     typer.echo(f"  Starting {target_env} '{service_name}'...")
-    minimal_compose = {
-        k: v for k, v in target_compose.items() if k != "services"
-    }
+    minimal_compose = {k: v for k, v in target_compose.items() if k != "services"}
     minimal_compose["services"] = {
         service_name: target_compose["services"][service_name]
     }
     labelled = _inject_labels(minimal_compose, target_env, project_name)
+    labelled = prepare_compose(labelled, project_name)
     _compose_up(labelled, [service_name], build)
 
     typer.echo(f"✅ '{service_name}' is now running as {target_env}")

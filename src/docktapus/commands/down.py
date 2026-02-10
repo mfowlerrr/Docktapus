@@ -3,6 +3,8 @@ import subprocess
 
 import typer
 
+from docktapus.commands.compose_utils import cleanup_networks, cleanup_volumes
+
 
 def _get_containers_by_project(project_name: str) -> list[str]:
     """Return container IDs labelled with dtop.project=<project_name>."""
@@ -59,4 +61,8 @@ def down(
     # Remove containers
     subprocess.run(["docker", "rm", *container_ids], check=True)
 
-    typer.echo("Containers stopped and removed")
+    # Clean up dtop-managed networks and volumes
+    cleanup_networks(project_name)
+    cleanup_volumes(project_name)
+
+    typer.echo("Containers, networks, and volumes removed")
