@@ -72,7 +72,7 @@ def ls(
         projects.setdefault(proj, []).append(c)
 
     # Column headers
-    hdr = f"{'CONTAINER ID':<15} {'NAME':<30} {'IMAGE':<30} {'STATUS':<20} {'PORTS':<30} {'ENV':<6}"
+    hdr = f"{'CONTAINER ID':<15} {'SERVICE':<20} {'CONTAINER NAME':<30} {'IMAGE':<30} {'STATUS':<20} {'PORTS':<30} {'ENV':<6}"
     sep = "-" * len(hdr)
 
     for proj_name in sorted(projects):
@@ -82,8 +82,10 @@ def ls(
         typer.echo(sep)
         for c in sorted(projects[proj_name], key=lambda x: x.get("Names", "")):
             env = _get_label(c.get("Labels", ""), "dtop.env")
+            service = _get_label(c.get("Labels", ""), "com.docker.compose.service")
             typer.echo(
                 f"{c.get('ID', ''):<15} "
+                f"{service:<20} "
                 f"{c.get('Names', ''):<30} "
                 f"{c.get('Image', ''):<30} "
                 f"{c.get('Status', ''):<20} "
