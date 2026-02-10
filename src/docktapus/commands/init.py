@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 import yaml
 import typer
 
-OCT_CONFIG = ".oct.yml"
+OCT_CONFIG = Path.home() / ".dtop.yml"
 
 
 def init(
@@ -13,6 +13,9 @@ def init(
     ),
     prod_compose_file: Path = typer.Option(
         ..., "-pcf", "--prod-compose-file", help="Path to prod docker-compose file"
+    ),
+    config_path: Path = typer.Option(
+        None, "-conf", "--config-file-path", help="Path to .dtop.yml config file"
     ),
     force: bool = typer.Option(False, "--force", help="Overwrite existing .oct.yml"),
 ):
@@ -25,8 +28,11 @@ def init(
 
     A single .oct.yml file can contain multiple projects.
     """
+
+    if not config_path.is_file():
+        typer.echo(f"Using default config path {OCT_CONFIG} ")
+        config_path = OCT_CONFIG
     cwd = Path.cwd()
-    config_path = cwd / OCT_CONFIG
 
     dev_path = dev_compose_file.expanduser().resolve()
     prod_path = prod_compose_file.expanduser().resolve()
@@ -67,6 +73,6 @@ def init(
 
     typer.echo("Project initialised")
     typer.echo(f"Project: {project_name}")
-    typer.echo(f"Root:  {cwd.resolve()}")
+    typer.echo(f"Project Root:  {cwd.resolve()}")
     typer.echo(f"Dev:   {dev_path}")
     typer.echo(f"Prod:  {prod_path}")
