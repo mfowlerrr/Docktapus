@@ -2,22 +2,29 @@ from pathlib import Path
 from datetime import datetime, timezone
 import yaml
 import typer
-from docktapus.app import app
 
 OCT_CONFIG = ".oct.yml"
 
 
-@app.command()
 def init(
     project_name: str = typer.Argument(..., help="Project name"),
     dev_compose_file: Path = typer.Option(
-        ..., "--dev-compose-file", help="Pat to dev docker-compose file"
+        ..., "-dcf", "--dev-compose-file", help="Path to dev docker-compose file"
     ),
     prod_compose_file: Path = typer.Option(
-        ..., "--prod-compose-file", help="Pat to prod docker-compose file"
+        ..., "-pcf", "--prod-compose-file", help="Path to prod docker-compose file"
     ),
     force: bool = typer.Option(False, "--force", help="Overwrite existing .oct.yml"),
 ):
+    """
+    Initialize a Docktapus project.
+
+    This registers a project with Docktapus by recording the locations of
+    your production and development docker-compose files. No containers
+    are started and no Docker commands are run.
+
+    A single .oct.yml file can contain multiple projects.
+    """
     cwd = Path.cwd()
     config_path = cwd / OCT_CONFIG
 

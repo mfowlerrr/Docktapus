@@ -2,18 +2,16 @@
 name = "docktapus"
 version = "0.1.0"
 description = ""
-authors = [
-    {name = "mfowlerrr",email = "matty01fowler@gmail.com"}
-]
+authors = [{ name = "mfowlerrr", email = "email@mfowler.dev" }]
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = [
-    "typer (>=0.21.1,<0.22.0)",
-    "pyyaml (>=6.0.3,<7.0.0)"
-]
+dependencies = ["typer (>=0.21.1,<0.22.0)", "pyyaml (>=6.0.3,<7.0.0)"]
 
 [tool.poetry]
-packages = [{include = "docktapus", from = "src"}]
+packages = [{ include = "docktapus", from = "src" }]
+[project.scripts]
+docktapus = "docktapus.main:app"
+dtop = "docktapus.main:app"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
